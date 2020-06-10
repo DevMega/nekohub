@@ -1,0 +1,129 @@
+{{define "content"}}
+<div class="col d-none align-items-center justify-content-center" id="loading">
+    <img src="/static/loading.gif" alt="">
+</div>
+<div id="dashboard">
+    {{if eq .vbrowser.State 0}}
+    <form id="create-form">
+        <div class="form-group">
+            <label for="adminpassword">Admin Password</label>
+            <input type="text" name="adminpassword" id="adminpassword" class="form-control">
+            <small id="emailHelp" class="form-text text-muted">Admin password for admin user of room</small>
+        </div>
+        <div class="form-group">
+            <label for="roompassword">Room Password</label>
+            <input type="text" name="roompassword" id="roompassword" class="form-control">
+            <small id="emailHelp" class="form-text text-muted">Room password for who wants join room</small>
+        </div>
+        <button class="btn btn-primary">Create room/virtual browser</button>
+    </form>
+    {{else}}
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Link</th>
+                <th scope="col">Admin password</th>
+                <th scope="col">Room password</th>
+                <th scope="col">State</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    <a href="http://rooms-{{.vbrowser.Bind}}.localhost" target="_blank">
+                        <svg class="bi bi-box-arrow-up-right" width="1em" height="1em" viewBox="0 0 16 16"
+                            fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd"
+                                d="M1.5 13A1.5 1.5 0 0 0 3 14.5h8a1.5 1.5 0 0 0 1.5-1.5V9a.5.5 0 0 0-1 0v4a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 0 0-1H3A1.5 1.5 0 0 0 1.5 5v8zm7-11a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-1 0V2.5H9a.5.5 0 0 1-.5-.5z" />
+                            <path fill-rule="evenodd"
+                                d="M14.354 1.646a.5.5 0 0 1 0 .708l-8 8a.5.5 0 0 1-.708-.708l8-8a.5.5 0 0 1 .708 0z" />
+                        </svg>
+                    </a>
+
+                </td>
+                <td>{{.vbrowser.AdminPassword}}</td>
+                <td>{{.vbrowser.RoomPassword}}</td>
+                <td>{{if eq .vbrowser.State 1}}Stoped{{else}}Running{{end}}</td>
+            </tr>
+        </tbody>
+    </table>
+    {{if eq .vbrowser.State 1}}
+    <button class="btn btn-primary" onclick="startvbrowser()">Start</button>
+    <button class="btn btn-danger" onclick="removevbrowser()">Remove</button>
+    {{else}}
+    <button class="btn btn-primary" onclick="stopvbrowser()">Stop</button>
+    {{end}}
+    {{end}}
+</div>
+<script>
+    var createForm = document.getElementById('create-form');
+    function showLoading() {
+        var loading = document.getElementById('loading');
+        var dashboard = document.getElementById('dashboard');
+
+        loading.classList.remove('d-none')
+        loading.classList.add('d-flex')
+        dashboard.classList.add('d-none')
+
+        // dashboard.style.display = 'none'
+        // loading.style.display = 'block'
+    }
+    function hideLoading() {
+        var loading = document.getElementById('loading');
+        var dashboard = document.getElementById('dashboard');
+
+        // dashboard.style.display = 'block'
+        // loading.style.display = 'none'
+        loading.classList.remove('d-flex')
+        loading.classList.add('d-none')
+        dashboard.classList.remove('d-none')
+    }
+    createForm.onsubmit = function (event) {
+        event.preventDefault();
+        showLoading()
+        var adminPassword = document.getElementById('adminpassword').value;
+        var roomPassword = document.getElementById('roompassword').value;
+        var data = new FormData()
+        data.append('adminpassword', adminPassword);
+        data.append('roompassword', roomPassword)
+        fetch('/createroom', {
+            method: 'post',
+            body: data
+        })
+            .then(response => response.text())
+            .then(data => {
+                location.reload()
+            })
+    }
+
+    function startvbrowser() {
+        showLoading()
+        fetch('/manageroom?action=start')
+            .then(response => response.text())
+            .then(data => {
+                //hideLoading()
+                location.reload()
+                console.log(data)
+            })
+    }
+    function stopvbrowser() {
+        showLoading()
+        fetch('/manageroom?action=stop')
+            .then(response => response.text())
+            .then(data => {
+                //hideLoading()
+                location.reload()
+                console.log(data)
+            })
+    }
+    function removevbrowser() {
+        fetch('/manageroom?action=remove')
+            .then(response => response.text())
+            .then(data => {
+                //hideLoading()
+                location.reload()
+                console.log(data)
+            })
+    }
+</script>
+{{end}}

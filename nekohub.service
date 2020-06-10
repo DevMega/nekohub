@@ -1,0 +1,14 @@
+#file path /etc/systemd/system/nekohub.service
+#systemctl start | stop
+[Unit]
+Description=nekohub
+
+[Service]
+#path your project exe
+ExecStart=[NEKOHUB PROJECT PATH]main
+#path your project folder
+WorkingDirectory=[NEKOHUB PROJECT PATH]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
